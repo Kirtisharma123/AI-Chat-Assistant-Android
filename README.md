@@ -85,7 +85,7 @@ The Firebase configuration file is excluded from this repository using `.gitigno
 ![Main Chat Screen](https://github.com/Kirtisharma123/AI-Chat-Assistant-Android/blob/main/chat%20interface.jpeg)
 
 ### 2. Chat History
-![Chat History](screenshots/chat-history.png)
+![Chat History](https://github.com/Kirtisharma123/AI-Chat-Assistant-Android/blob/main/chat%20history.jpeg)
 
 ### 3. Search Chat History
 ![Search Chat History](screenshots/search-history.png)
