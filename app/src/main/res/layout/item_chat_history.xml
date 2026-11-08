@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/historyItemContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_marginBottom="10dp"
+    android:background="#FFFFFF"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground">
+
+    <!-- Conversation Title -->
+    <TextView
+        android:id="@+id/textViewConversationTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="What is Artificial Intelligence?"
+        android:textColor="#263A73"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:maxLines="2"
+        android:ellipsize="end" />
+
+    <!-- Last Message Time -->
+    <TextView
+        android:id="@+id/textViewConversationTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="06 Nov 2026, 10:30 AM"
+        android:textColor="#777777"
+        android:textSize="12sp" />
+
+</LinearLayout>

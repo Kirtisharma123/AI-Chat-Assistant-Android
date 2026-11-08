@@ -1,0 +1,7 @@
+<resources>
+
+    <string name="app_name">AI Chat Assistant</string>
+    <string name="message_hint">Type your message</string>
+    <string name="send">Send</string>
+    <string name="sample_message">Sample message</string>
+</resources>

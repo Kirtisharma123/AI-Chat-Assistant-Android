@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F6FA">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:background="#263A73">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:text="Chat History"
+            android:textColor="#FFFFFF"
+            android:textSize="21sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <!-- Search Bar -->
+    <EditText
+        android:id="@+id/editTextSearchHistory"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginBottom="8dp"
+        android:background="@android:drawable/edit_text"
+        android:hint="Search conversations..."
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:singleLine="true"
+        android:inputType="text"
+        android:textSize="15sp"
+        android:drawableStart="@android:drawable/ic_menu_search"
+        android:drawablePadding="8dp" />
+
+    <!-- Empty State Message -->
+    <TextView
+        android:id="@+id/textViewEmptyHistory"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:padding="24dp"
+        android:text="No conversations yet.\nStart a new chat to see your history here."
+        android:textColor="#777777"
+        android:textSize="16sp"
+        android:visibility="gone" />
+
+    <!-- Conversation List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewHistory"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="12dp"
+        android:clipToPadding="false" />
+
+</LinearLayout>
