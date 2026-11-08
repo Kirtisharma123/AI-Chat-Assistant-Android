@@ -91,7 +91,7 @@ The Firebase configuration file is excluded from this repository using `.gitigno
 ![Search Chat History](https://github.com/Kirtisharma123/AI-Chat-Assistant-Android/blob/main/search%20bar.jpeg)
 
 ### 4. PDF Export
-![PDF Export](screenshots/pdf-export.png)
+![PDF Export](https://github.com/Kirtisharma123/AI-Chat-Assistant-Android/blob/main/WhatsApp%20Image%202026-11-08%20at%203.59.27%20PM.jpeg)
 
 ## Author
 
