@@ -79,6 +79,20 @@ The Firebase configuration file is excluded from this repository using `.gitigno
 - Add voice input and output.
 - Implement additional AI-powered features.
 
+## App Screenshots
+
+### 1. Main Chat Screen
+![Main Chat Screen](screenshots/chat-screen.png)
+
+### 2. Chat History
+![Chat History](screenshots/chat-history.png)
+
+### 3. Search Chat History
+![Search Chat History](screenshots/search-history.png)
+
+### 4. PDF Export
+![PDF Export](screenshots/pdf-export.png)
+
 ## Author
 
 **Kirti Sharma**
