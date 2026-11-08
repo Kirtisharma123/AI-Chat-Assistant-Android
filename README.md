@@ -82,7 +82,7 @@ The Firebase configuration file is excluded from this repository using `.gitigno
 ## App Screenshots
 
 ### 1. Main Chat Screen
-![Main Chat Screen](screenshots/chat-screen.png)
+![Main Chat Screen](chat interface.jpeg)
 
 ### 2. Chat History
 ![Chat History](screenshots/chat-history.png)
