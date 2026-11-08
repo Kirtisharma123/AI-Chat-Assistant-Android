@@ -82,7 +82,8 @@ The Firebase configuration file is excluded from this repository using `.gitigno
 ## App Screenshots
 
 ### 1. Main Chat Screen
-![Main Chat Screen](chat interface.jpeg)
+![Main Chat Screen](<img width="702" height="1600" alt="chat interface" src="https://github.com/user-attachments/assets/c9639930-2789-44ae-9d41-c5bd2d89e5e9" />
+)
 
 ### 2. Chat History
 ![Chat History](screenshots/chat-history.png)
