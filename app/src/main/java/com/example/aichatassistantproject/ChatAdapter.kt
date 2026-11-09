@@ -6,9 +6,11 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Gravity
 import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
@@ -37,6 +39,9 @@ class ChatAdapter(
         val textViewTimestamp =
             itemView.findViewById<TextView>(R.id.textViewTimestamp)
 
+        val textViewAiAvatar =
+            itemView.findViewById<TextView>(R.id.textViewAiAvatar)
+
         var typingAnimator: ObjectAnimator? = null
     }
 
@@ -58,9 +63,14 @@ class ChatAdapter(
 
         val message = messageList[position]
 
+        // Set message text
         holder.textViewMessage.text = message.message
 
-        // Format message timestamp
+        // Show AI avatar only for AI messages
+        holder.textViewAiAvatar.visibility =
+            if (message.isUser) View.GONE else View.VISIBLE
+
+        // Format timestamp
         val timeFormat = SimpleDateFormat(
             "hh:mm a",
             Locale.getDefault()
@@ -73,11 +83,12 @@ class ChatAdapter(
         holder.textViewTimestamp.visibility =
             if (message.isTyping) View.GONE else View.VISIBLE
 
-        // Cancel any previous animation
+        // Reset previous animation
         holder.typingAnimator?.cancel()
         holder.typingAnimator = null
+        holder.textViewMessage.alpha = 1f
 
-        // Animate typing indicator
+        // Typing animation
         if (message.isTyping) {
 
             holder.typingAnimator = ObjectAnimator.ofFloat(
@@ -91,9 +102,6 @@ class ChatAdapter(
                 repeatMode = ValueAnimator.REVERSE
                 start()
             }
-
-        } else {
-            holder.textViewMessage.alpha = 1f
         }
 
         // Set message bubble background
@@ -105,22 +113,39 @@ class ChatAdapter(
             }
         )
 
+        // Set message text color
+        holder.textViewMessage.setTextColor(
+            if (message.isUser) {
+                Color.WHITE
+            } else {
+                Color.rgb(37, 38, 65)
+            }
+        )
+
         // Align user and AI messages
         holder.messageContainer.gravity =
             if (message.isUser) {
-                android.view.Gravity.END
+                Gravity.END
             } else {
-                android.view.Gravity.START
+                Gravity.START
             }
 
         holder.messageBubbleContainer.gravity =
             if (message.isUser) {
-                android.view.Gravity.END
+                Gravity.END
             } else {
-                android.view.Gravity.START
+                Gravity.START
             }
 
-        // Show Copy and Share options on long press
+        // Set timestamp alignment
+        holder.textViewTimestamp.gravity =
+            if (message.isUser) {
+                Gravity.END
+            } else {
+                Gravity.START
+            }
+
+        // Copy and Share options on long press
         holder.textViewMessage.setOnLongClickListener {
 
             if (!message.isTyping && message.message.isNotBlank()) {
@@ -189,7 +214,6 @@ class ChatAdapter(
                 }
 
                 popupMenu.show()
-
                 true
 
             } else {
@@ -202,12 +226,13 @@ class ChatAdapter(
         return messageList.size
     }
 
-    // Stop animation when a ViewHolder is recycled
+    // Stop animation when ViewHolder is recycled
     override fun onViewRecycled(holder: ChatViewHolder) {
         super.onViewRecycled(holder)
 
         holder.typingAnimator?.cancel()
         holder.typingAnimator = null
+
         holder.textViewMessage.alpha = 1f
         holder.textViewMessage.setOnLongClickListener(null)
     }

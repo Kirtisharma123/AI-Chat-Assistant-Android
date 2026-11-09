@@ -2,8 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Internet permission for Firebase and Gemini API -->
+    <!-- Internet Permission -->
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Microphone Permission for Voice Input -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:allowBackup="true"
@@ -15,7 +18,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AIChatAssistantProject">
 
-        <!-- Main Chat Screen -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -25,13 +27,11 @@
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
         </activity>
 
-        <!-- Chat History Screen -->
         <activity
             android:name=".ChatHistoryActivity"
             android:exported="false"

@@ -1,10 +1,15 @@
 package com.example.aichatassistantproject
 
+import android.Manifest
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import android.os.Bundle
+import android.speech.RecognizerIntent
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
@@ -12,6 +17,9 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -37,6 +45,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var buttonHistory: Button
     private lateinit var buttonShareChat: Button
     private lateinit var buttonExportPdf: Button
+    private lateinit var buttonVoiceInput: Button
 
     private lateinit var chatAdapter: ChatAdapter
     private lateinit var geminiHelper: GeminiHelper
@@ -44,6 +53,8 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var historyLauncher: ActivityResultLauncher<Intent>
     private lateinit var pdfSaveLauncher: ActivityResultLauncher<String>
+    private lateinit var voiceInputLauncher: ActivityResultLauncher<Intent>
+    private lateinit var microphonePermissionLauncher: ActivityResultLauncher<String>
 
     private var pendingPdfBytes: ByteArray? = null
 
@@ -58,7 +69,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Register History screen result launcher
+        // Handle system navigation bar and keyboard separately
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         historyLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
@@ -76,7 +89,6 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Register PDF save launcher
         pdfSaveLauncher = registerForActivityResult(
             ActivityResultContracts.CreateDocument("application/pdf")
         ) { uri ->
@@ -94,15 +106,83 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        voiceInputLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+
+            if (result.resultCode == RESULT_OK) {
+
+                val spokenText = result.data
+                    ?.getStringArrayListExtra(
+                        RecognizerIntent.EXTRA_RESULTS
+                    )
+                    ?.firstOrNull()
+
+                if (!spokenText.isNullOrBlank()) {
+
+                    messageInput.setText(spokenText)
+                    messageInput.setSelection(messageInput.text.length)
+
+                } else {
+
+                    Toast.makeText(
+                        this,
+                        "No speech recognized. Please try again.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+
+        microphonePermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+
+            if (isGranted) {
+                startVoiceRecognition()
+            } else {
+
+                Toast.makeText(
+                    this,
+                    "Microphone permission is required for voice input.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+
         // Initialize Firebase
         Firebase.initialize(context = this)
 
-        // Configure Firebase App Check
         Firebase.appCheck.installAppCheckProviderFactory(
             DebugAppCheckProviderFactory.getInstance()
         )
 
         setContentView(R.layout.activity_main)
+
+        // Handle system navigation bar and keyboard insets
+        val rootLayout = findViewById<View>(R.id.rootLayout)
+
+        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { view, insets ->
+
+            val systemBars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars()
+            )
+
+            val keyboard = insets.getInsets(
+                WindowInsetsCompat.Type.ime()
+            )
+
+            view.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                maxOf(systemBars.bottom, keyboard.bottom)
+            )
+
+            insets
+        }
+
+        ViewCompat.requestApplyInsets(rootLayout)
 
         // Connect XML views
         recyclerView = findViewById(R.id.recyclerViewMessages)
@@ -113,29 +193,34 @@ class MainActivity : ComponentActivity() {
         buttonHistory = findViewById(R.id.buttonHistory)
         buttonShareChat = findViewById(R.id.buttonShareChat)
         buttonExportPdf = findViewById(R.id.buttonExportPdf)
+        buttonVoiceInput = findViewById(R.id.buttonVoiceInput)
 
-        // Restore previously active conversation
+        // Keep input and buttons active
+        messageInput.isEnabled = true
+        messageInput.isFocusable = true
+        messageInput.isFocusableInTouchMode = true
+        messageInput.isClickable = true
+
+        sendButton.isEnabled = true
+        buttonVoiceInput.isEnabled = true
+
+        // Restore active conversation
         currentConversationId = preferences.getString(
             "current_conversation_id",
             "default"
         ) ?: "default"
 
-        // Initialize Gemini
         geminiHelper = GeminiHelper()
 
-        // Initialize Room Database
         chatDao = ChatDatabase.getDatabase(this).chatDao()
 
-        // Set up RecyclerView
+        // RecyclerView setup
         chatAdapter = ChatAdapter(messageList)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = chatAdapter
 
-        // Initially load the active conversation
-        loadConversation(currentConversationId)
-
-        // Share full conversation
+        // Share conversation
         buttonShareChat.setOnClickListener {
 
             if (!sendButton.isEnabled) {
@@ -146,7 +231,7 @@ class MainActivity : ComponentActivity() {
             shareFullConversation()
         }
 
-        // Export conversation as PDF
+        // Export PDF
         buttonExportPdf.setOnClickListener {
 
             if (!sendButton.isEnabled) {
@@ -157,7 +242,7 @@ class MainActivity : ComponentActivity() {
             exportConversationAsPdf()
         }
 
-        // History button
+        // History
         buttonHistory.setOnClickListener {
 
             if (!sendButton.isEnabled) {
@@ -173,7 +258,7 @@ class MainActivity : ComponentActivity() {
             historyLauncher.launch(intent)
         }
 
-        // New Chat button
+        // New Chat
         buttonNewChat.setOnClickListener {
 
             if (!sendButton.isEnabled) {
@@ -202,7 +287,7 @@ class MainActivity : ComponentActivity() {
             ).show()
         }
 
-        // Clear current conversation
+        // Clear Chat
         buttonClearChat.setOnClickListener {
 
             if (!sendButton.isEnabled) {
@@ -253,7 +338,27 @@ class MainActivity : ComponentActivity() {
                 .show()
         }
 
-        // Send button
+        // Voice Input
+        buttonVoiceInput.setOnClickListener {
+
+            if (!sendButton.isEnabled) {
+                showWaitMessage()
+                return@setOnClickListener
+            }
+
+            if (
+                checkSelfPermission(Manifest.permission.RECORD_AUDIO) ==
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                startVoiceRecognition()
+            } else {
+                microphonePermissionLauncher.launch(
+                    Manifest.permission.RECORD_AUDIO
+                )
+            }
+        }
+
+        // Send Message
         sendButton.setOnClickListener {
 
             val message = messageInput.text.toString().trim()
@@ -277,9 +382,9 @@ class MainActivity : ComponentActivity() {
 
                 messageInput.text.clear()
 
-                // Add typing indicator
                 val replyPosition = messageList.size
 
+                // Typing indicator
                 messageList.add(
                     ChatMessage(
                         message = "●  ●  ●",
@@ -300,7 +405,6 @@ class MainActivity : ComponentActivity() {
 
                     try {
 
-                        // Save user's message
                         chatDao.insertMessage(
                             ChatEntity(
                                 message = message,
@@ -309,7 +413,6 @@ class MainActivity : ComponentActivity() {
                             )
                         )
 
-                        // Generate AI response
                         val aiResponse =
                             geminiHelper.generateResponse(message)
 
@@ -318,7 +421,6 @@ class MainActivity : ComponentActivity() {
                             isUser = false
                         )
 
-                        // Save AI response
                         chatDao.insertMessage(
                             ChatEntity(
                                 message = aiResponse,
@@ -351,21 +453,64 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Handle Send action from keyboard
+        // Keyboard Send action
         messageInput.setOnEditorActionListener { _, actionId, _ ->
 
             if (actionId == EditorInfo.IME_ACTION_SEND) {
-
                 sendButton.performClick()
                 true
-
             } else {
                 false
             }
         }
+
+        // Load conversation after listeners are ready
+        loadConversation(currentConversationId)
     }
 
-    // Share complete current conversation
+    // Speech Recognition
+    private fun startVoiceRecognition() {
+
+        try {
+
+            val speechIntent = Intent(
+                RecognizerIntent.ACTION_RECOGNIZE_SPEECH
+            ).apply {
+
+                putExtra(
+                    RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                )
+
+                putExtra(
+                    RecognizerIntent.EXTRA_LANGUAGE,
+                    Locale.getDefault().toString()
+                )
+
+                putExtra(
+                    RecognizerIntent.EXTRA_PROMPT,
+                    "Speak your message"
+                )
+
+                putExtra(
+                    RecognizerIntent.EXTRA_MAX_RESULTS,
+                    1
+                )
+            }
+
+            voiceInputLauncher.launch(speechIntent)
+
+        } catch (e: ActivityNotFoundException) {
+
+            Toast.makeText(
+                this,
+                "Speech recognition is not available on this device.",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    // Share conversation
     private fun shareFullConversation() {
 
         lifecycleScope.launch {
@@ -401,11 +546,7 @@ class MainActivity : ComponentActivity() {
 
                     savedMessages.forEach { chat ->
 
-                        val sender = if (chat.isUser) {
-                            "You"
-                        } else {
-                            "Gemini AI"
-                        }
+                        val sender = if (chat.isUser) "You" else "Gemini AI"
 
                         appendLine("$sender:")
                         appendLine(chat.message)
@@ -421,16 +562,8 @@ class MainActivity : ComponentActivity() {
 
                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"
-
-                    putExtra(
-                        Intent.EXTRA_SUBJECT,
-                        "My AI Chat Conversation"
-                    )
-
-                    putExtra(
-                        Intent.EXTRA_TEXT,
-                        shareText
-                    )
+                    putExtra(Intent.EXTRA_SUBJECT, "My AI Chat Conversation")
+                    putExtra(Intent.EXTRA_TEXT, shareText)
                 }
 
                 startActivity(
@@ -451,7 +584,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Export current conversation as PDF
+    // Export PDF
     private fun exportConversationAsPdf() {
 
         lifecycleScope.launch {
@@ -502,7 +635,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Create a multi-page PDF
+    // Create PDF
     private fun createConversationPdf(
         savedMessages: List<ChatEntity>
     ): ByteArray {
@@ -588,7 +721,6 @@ class MainActivity : ComponentActivity() {
             y = 55f
         }
 
-        // Draw text with automatic line wrapping
         fun drawWrappedText(
             text: String,
             paint: Paint,
@@ -596,7 +728,6 @@ class MainActivity : ComponentActivity() {
         ) {
 
             val maxWidth = usableWidth - extraIndent
-
             val paragraphs = text.split("\n")
 
             for (paragraph in paragraphs) {
@@ -661,17 +792,11 @@ class MainActivity : ComponentActivity() {
 
         try {
 
-            drawWrappedText(
-                "AI Chat Assistant",
-                titlePaint
-            )
+            drawWrappedText("AI Chat Assistant", titlePaint)
 
             y += 5f
 
-            drawWrappedText(
-                "Conversation Export",
-                bodyPaint
-            )
+            drawWrappedText("Conversation Export", bodyPaint)
 
             y += 10f
 
@@ -692,22 +817,10 @@ class MainActivity : ComponentActivity() {
 
             savedMessages.forEach { chat ->
 
-                val sender = if (chat.isUser) {
-                    "You"
-                } else {
-                    "Gemini AI"
-                }
+                val sender = if (chat.isUser) "You" else "Gemini AI"
 
-                drawWrappedText(
-                    sender,
-                    senderPaint
-                )
-
-                drawWrappedText(
-                    chat.message,
-                    bodyPaint,
-                    8f
-                )
+                drawWrappedText(sender, senderPaint)
+                drawWrappedText(chat.message, bodyPaint, 8f)
 
                 drawWrappedText(
                     "Time: ${dateFormat.format(Date(chat.timestamp))}",
@@ -736,7 +849,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Save generated PDF to selected device location
+    // Save PDF
     private fun savePdfToDevice(uri: Uri) {
 
         val pdfBytes = pendingPdfBytes
@@ -771,10 +884,7 @@ class MainActivity : ComponentActivity() {
                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
                     type = "application/pdf"
 
-                    putExtra(
-                        Intent.EXTRA_STREAM,
-                        uri
-                    )
+                    putExtra(Intent.EXTRA_STREAM, uri)
 
                     addFlags(
                         Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -801,7 +911,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Load a particular conversation
+    // Load conversation
     private fun loadConversation(conversationId: String) {
 
         setChatControlsEnabled(false)
@@ -838,9 +948,7 @@ class MainActivity : ComponentActivity() {
                 chatAdapter.notifyDataSetChanged()
 
                 if (messageList.isNotEmpty()) {
-                    recyclerView.scrollToPosition(
-                        messageList.size - 1
-                    )
+                    recyclerView.scrollToPosition(messageList.size - 1)
                 }
 
             } catch (e: Exception) {
@@ -857,7 +965,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Enable or disable chat controls
+    // Enable or disable controls
     private fun setChatControlsEnabled(enabled: Boolean) {
 
         sendButton.isEnabled = enabled
@@ -866,9 +974,20 @@ class MainActivity : ComponentActivity() {
         buttonHistory.isEnabled = enabled
         buttonShareChat.isEnabled = enabled
         buttonExportPdf.isEnabled = enabled
+        buttonVoiceInput.isEnabled = enabled
+
+        // Never disable the message input
+        messageInput.isEnabled = true
+        messageInput.isFocusable = true
+        messageInput.isFocusableInTouchMode = true
+        messageInput.isClickable = true
+
+        messageInput.alpha = 1f
+        sendButton.alpha = if (enabled) 1f else 0.5f
+        buttonVoiceInput.alpha = if (enabled) 1f else 0.5f
     }
 
-    // Show wait message
+    // Wait message
     private fun showWaitMessage() {
 
         Toast.makeText(
