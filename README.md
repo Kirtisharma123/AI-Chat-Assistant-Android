@@ -1,6 +1,6 @@
 # AI Chat Assistant Android App
 
-An Android-based AI Chat Assistant built using **Kotlin, Firebase Gemini AI, and Room Database**. The application allows users to interact with an AI assistant, manage multiple conversations, search chat history, and export conversations as PDF files.
+An Android-based AI Chat Assistant built using **Kotlin, Firebase AI Logic (Gemini), and Room Database**. The application allows users to interact with an AI assistant, manage multiple conversations, search chat history, use voice input, and export conversations as PDF files.
 
 ## Features
 
@@ -10,9 +10,10 @@ An Android-based AI Chat Assistant built using **Kotlin, Firebase Gemini AI, and
 - **Local Data Storage:** Store conversations and messages using Room Database.
 - **Search Chat History:** Search across saved conversations and messages.
 - **Delete Conversations:** Delete individual conversations.
-- **Copy & Share Messages:** Copy or share individual AI and user messages.
+- **Copy & Share Messages:** Copy or share individual messages.
 - **Share Full Conversation:** Share an entire conversation.
 - **PDF Export:** Export conversations as PDF files.
+- **Voice Input:** Convert speech into text using Android Speech Recognition.
 - **Timestamps:** Display message timestamps.
 - **Error Handling:** Handle internet connectivity and AI response errors.
 
@@ -27,28 +28,24 @@ An Android-based AI Chat Assistant built using **Kotlin, Firebase Gemini AI, and
 - **Architecture Components:** Android Lifecycle and Coroutines
 - **Version Control:** Git & GitHub
 
-## Project Structure
+## App Screenshots
 
-```text
-AI-Chat-Assistant-Android/
-├── app/
-│   └── src/
-│       └── main/
-│           ├── java/
-│           │   └── com/example/aichatassistantproject/
-│           │       ├── MainActivity.kt
-│           │       ├── GeminiHelper.kt
-│           │       ├── ChatAdapter.kt
-│           │       ├── ChatHistoryActivity.kt
-│           │       ├── ChatHistoryAdapter.kt
-│           │       ├── ChatDatabase.kt
-│           │       ├── ChatDao.kt
-│           │       └── ChatEntity.kt
-│           └── res/
-│               └── layout/
-├── build.gradle.kts
-└── settings.gradle.kts
-```
+### 1. Home Screen
+![Home Screen](Screenshots/Chat Interface.jpeg)
+
+### 2. AI Response
+![AI Response](Screenshots/AI Response.jpeg)
+
+### 3. Chat History
+![Chat History](Screenshots/Chat History.jpeg)
+
+### 4. Voice Input
+![Voice Input](Screenshots/Voice Input Sample 1.jpeg)
+![Voice Input](Screenshots/Voice Input Response Sample 2.jpeg)
+
+### 5. PDF Export
+![PDF Export](Screenshots/PDF Export Sample.jpeg)
+![PDF Export](Screenshots/PDF Export Sample 1.jpeg)
 
 ## Setup Instructions
 
@@ -74,24 +71,9 @@ The Firebase configuration file is excluded from this repository using `.gitigno
 
 ## Future Improvements
 
-- Improve UI/UX design.
 - Add user authentication.
-- Add voice input and output.
-- Implement additional AI-powered features.
-
-## App Screenshots
-
-### 1. Main Chat Screen
-![Main Chat Screen](https://github.com/Kirtisharma123/AI-Chat-Assistant-Android/blob/main/chat%20interface.jpeg)
-
-### 2. Chat History
-![Chat History](https://github.com/Kirtisharma123/AI-Chat-Assistant-Android/blob/main/chat%20history.jpeg)
-
-### 3. Search Chat History
-![Search Chat History](https://github.com/Kirtisharma123/AI-Chat-Assistant-Android/blob/main/search%20bar.jpeg)
-
-### 4. PDF Export
-![PDF Export](https://github.com/Kirtisharma123/AI-Chat-Assistant-Android/blob/main/WhatsApp%20Image%202026-11-08%20at%203.59.27%20PM.jpeg)
+- Add AI-powered features and enhancements.
+- Improve UI/UX design.
 
 ## Author
 
