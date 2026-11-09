@@ -45,7 +45,7 @@ An Android-based AI Chat Assistant built using **Kotlin, Firebase AI Logic (Gemi
 
 ### 5. PDF Export
 ![PDF Export](https://github.com/Kirtisharma123/AI-Chat-Assistant-Android/blob/main/screenshots/PDF%20Export%20Sample.jpeg)
-![PDF Export](Screenshots/PDF Export Sample 1.jpeg)
+![PDF Export](https://github.com/Kirtisharma123/AI-Chat-Assistant-Android/blob/main/screenshots/PDF%20Export%20Sample%201.jpeg)
 
 ## Setup Instructions
 
