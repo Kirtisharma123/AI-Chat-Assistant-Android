@@ -37,7 +37,7 @@ An Android-based AI Chat Assistant built using **Kotlin, Firebase AI Logic (Gemi
 ![AI Response](https://github.com/Kirtisharma123/AI-Chat-Assistant-Android/blob/main/screenshots/AI%20Response.jpeg)
 
 ### 3. Chat History
-![Chat History](Screenshots/Chat History.jpeg)
+![Chat History](https://github.com/Kirtisharma123/AI-Chat-Assistant-Android/blob/main/screenshots/Chat%20History.jpeg)
 
 ### 4. Voice Input
 ![Voice Input](Screenshots/Voice Input Sample 1.jpeg)
